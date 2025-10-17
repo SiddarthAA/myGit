@@ -114,26 +114,39 @@ class MyGitHigherFuncs:
         self.ll_funcs.update_ref("HEAD", oid)
 
     def create_tag(self, name, oid):
-        self.ll_funcs.update_ref(f"rel/tags/{name}", oid)
+        self.ll_funcs.update_ref(f"refs/tags/{name}", oid)
 
+    def create_annotated_tag(self, name, oid, message):
+        tag_content = f"object {oid}\n"
+        tag_content += f"type commit\n"
+        tag_content += f"tag {name}\n"
+        tag_content += f"\n{message}\n"
+        tag_oid = self.ll_funcs.hash_object(tag_content.encode(), "tag")
+        self.ll_funcs.update_ref(f"refs/tags/{name}", tag_oid)
 
-def get_oid(self, name):
-    if name == "@":
-        name = "HEAD"
+    def delete_tag(self, name):
+        self.ll_funcs.delete_ref(f"refs/tags/{name}")
 
-    refs_to_try = [
-        f"{name}",
-        f"refs/{name}",
-        f"refs/tags/{name}",
-        f"refs/heads/{name}",
-    ]
-    for ref in refs_to_try:
-        oid = self.ll_funcs.get_ref(ref)
-        if oid:
-            return oid
+    def get_all_tags(self):
+        return (ref.name for ref in self.ll_funcs.get_all_refs("refs/tags"))
 
-    is_hex = all(c in string.hexdigits for c in name)
-    if len(name) == 40 and is_hex:
-        return name
+    def get_oid(self, name):
+        if name == "@":
+            name = "HEAD"
 
-    raise Exception(f"Uknown name {name}")
+        refs_to_try = [
+            f"{name}",
+            f"refs/{name}",
+            f"refs/tags/{name}",
+            f"refs/heads/{name}",
+        ]
+        for ref in refs_to_try:
+            oid = self.ll_funcs.get_ref(ref)
+            if oid:
+                return oid
+
+        is_hex = all(c in string.hexdigits for c in name)
+        if len(name) == 40 and is_hex:
+            return name
+
+        raise Exception(f"Uknown name {name}")

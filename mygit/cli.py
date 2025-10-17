@@ -52,7 +52,10 @@ def parse_args():
 
     tag_parser = commands.add_parser("tag")
     tag_parser.set_defaults(func=tag)
-    tag_parser.add_argument("name")
+    tag_parser.add_argument("-a", dest="annotated", action="store_true")
+    tag_parser.add_argument("-m", dest="message", help="Tag message")
+    tag_parser.add_argument("-d", dest="delete", action="store_true")
+    tag_parser.add_argument("name", nargs="?")
     tag_parser.add_argument("oid", nargs="?")
 
     return parser.parse_args()
@@ -118,8 +121,23 @@ def checkout(args):
 
 
 def tag(args):
-    oid = args.oid or repo_funcs.get_ref("HEAD")
-    hl_funcs.create_tag(args.name, oid)
+    if args.annotated:
+        if not args.name or not args.message:
+            print("Error: Annotated tags require a name and a message", file=sys.stderr)
+            sys.exit(1)
+        oid = args.oid or repo_funcs.get_ref("HEAD")
+        hl_funcs.create_annotated_tag(args.name, oid, args.message)
+    elif args.delete:
+        if not args.name:
+            print("Error: Delete tag requires a name", file=sys.stderr)
+            sys.exit(1)
+        hl_funcs.delete_tag(args.name)
+    elif args.name:
+        oid = args.oid or repo_funcs.get_ref("HEAD")
+        hl_funcs.create_tag(args.name, oid)
+    else:
+        for tag in hl_funcs.get_all_tags():
+            print(tag)
 
 
 def main():

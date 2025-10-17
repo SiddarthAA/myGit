@@ -10,8 +10,17 @@ commands working so far :
 5. read-tree
 6. commit
 7. checkout
+8. tag
 
 I shall update the readme as I add features :)
+
+### Tag Command Usage:
+
+- `mygit tag`: Lists all existing tags.
+- `mygit tag <tag-name> <commit-hash>`: Creates a new lightweight tag. If `commit-hash` is not given, defaults to HEAD.
+- `mygit tag -a <tag-name> <commit-hash> -m 'Tagging message'`: Creates a new annotated tag. If `commit-hash` is not given, defaults to HEAD.
+- `mygit checkout <tag-name>`: Checks out the commit with that tag.
+- `mygit tag -d <tag-name>`: Deletes the tag with `tag-name`.
 
 ## Installation Instructions :
 

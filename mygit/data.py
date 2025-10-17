@@ -19,7 +19,7 @@ class MyGitFuncs:
 
     def hash_object(self, data, type_="blob"):
         obj = type_.encode() + b"\x00" + data
-        oid = hashlib.sha512(obj).hexdigest()
+        oid = hashlib.sha1(obj).hexdigest()
         path = Path(self.GIT_DIR) / "objects" / oid
         with path.open(mode="wb") as f:
             f.write(obj)
@@ -46,3 +46,15 @@ class MyGitFuncs:
         ref_path = Path(self.GIT_DIR) / ref
         if ref_path.is_file():
             return ref_path.read_text().strip()
+
+    def delete_ref(self, ref):
+        ref_path = Path(self.GIT_DIR) / ref
+        if ref_path.is_file():
+            ref_path.unlink()
+
+    def get_all_refs(self, prefix=""):
+        path = Path(self.GIT_DIR) / prefix
+        if path.exists():
+            for ref_path in path.rglob("*"):
+                if ref_path.is_file():
+                    yield ref_path.relative_to(self.GIT_DIR)
